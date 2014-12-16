@@ -1,0 +1,5 @@
+[package]
+
+name = "rust_cam"
+version = "0.0.1"
+authors = ["Yuri Pourre <yuripourre@gmail.com>"]
