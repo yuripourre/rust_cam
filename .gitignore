@@ -1,0 +1,6 @@
+# Pre-Compiled Files #
+*.so
+*.lock
+/target
+
+

@@ -20,7 +20,7 @@ static int xioctl(int fd, int request, void *arg)
         return r;
 }
  
-int print_caps(int fd)
+int v4l_print_caps(int fd)
 {
         struct v4l2_capability caps = {};
         if (-1 == xioctl(fd, VIDIOC_QUERYCAP, &caps))
@@ -112,7 +112,7 @@ int print_caps(int fd)
         return 0;
 }
  
-int init_mmap(int fd)
+int v4l_init_mmap(int fd)
 {
     struct v4l2_requestbuffers req = {0};
     req.count = 1;
@@ -142,7 +142,7 @@ int init_mmap(int fd)
     return 0;
 }
 
-int capture_image(int fd)
+int v4l_capture_image(int fd)
 {
     struct v4l2_buffer buf = {0};
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -180,38 +180,46 @@ int capture_image(int fd)
     printf ("saving image\n");
 }
 
-int open_device(const char* device_name) 
+int v4l_open_first_device()
 {
-    return open(device_name, O_RDWR);
+    return v4l_open_device("/dev/video0");
 }
 
-int close_device(int device) 
+
+int v4l_open_device(const char* device_name) 
+{
+
+    int fd = open(device_name, O_RDWR);
+    if (fd == -1)
+    {
+        perror("Opening video device");
+        printf("%s not found\n", device_name);
+    }
+
+    return fd;
+}
+
+int v4l_close_device(int device) 
 {
     close(device);
 }
 
 int main()
 {
-        int fd = open_device("/dev/video0");
+        int fd = v4l_open_device("/dev/video0");
 
-        if (fd == -1)
-        {
-                perror("Opening video device");
-                return 1;
-        }
-
-        if(print_caps(fd))
+        if(v4l_print_caps(fd))
             return 1;
         
-        if(init_mmap(fd))
+        if(v4l_init_mmap(fd))
             return 1;
 
         int i;
         for(i=0; i<5; i++)
         {
-            if(capture_image(fd))
+            if(v4l_capture_image(fd))
                 return 1;
         }
-        close_device(fd);
+        v4l_close_device(fd);
         return 0;
 }
