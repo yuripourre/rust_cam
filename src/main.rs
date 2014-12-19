@@ -1,9 +1,12 @@
 mod v4l {
-      
+
+extern crate libc;
+
+use self::libc::c_char;
+    
     #[link(name = "v4l-rust")]
     extern {
-        fn v4l_open_device(device_name: &str) -> i32;
-        fn v4l_open_first_device() -> i32;
+        fn v4l_open_device(device_name: *const libc::c_char) -> i32;
         fn v4l_close_device(device: i32) -> i32;
         fn v4l_print_caps(fd: i32) -> i32;
         fn v4l_init_mmap(fd: i32) -> i32;
@@ -12,13 +15,7 @@ mod v4l {
 
     pub fn open_device(device_name: &str) -> i32 {
         unsafe {
-            v4l_open_device(device_name)
-        }
-    }
-
-    pub fn open_first_device() -> i32 {
-        unsafe {
-            v4l_open_first_device()
+            v4l_open_device(device_name.to_c_str().as_ptr())
         }
     }
 
@@ -50,7 +47,7 @@ mod v4l {
 
 fn main() -> () {
 
-    let fd = v4l::open_first_device();
+    let fd = v4l::open_device("/dev/video0");
     println!("fd = {}", fd);
     
     v4l::print_caps(fd);
